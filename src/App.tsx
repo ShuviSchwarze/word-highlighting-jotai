@@ -11,8 +11,9 @@ type Word = {
   highlight: boolean;
 };
 
+// 8000 words sample data
 const transcriptionApiResAtom = atom(
-  [...Array(500).keys()].map((i) =>
+  [...Array(400).keys()].map((i) =>
     [...Array(20).keys()].map((j) => {
       return {
         start: (20 * i + j) / 4,
@@ -32,7 +33,7 @@ const flatWordsAtom = atom((get) => {
   return [].concat.apply([], [...lineAtoms]) as Word[];
 });
 
-const bucketSize = 5;
+const bucketSize = 3;
 
 const timeBucketAtom = atom((get) => {
   const words = get(flatWordsAtom);
@@ -52,7 +53,6 @@ const timeBucketAtom = atom((get) => {
     },
     {} as Record<number, number>,
   );
-  console.log(bucketIndexes, words);
 
   return {
     bucketIndexes,
@@ -67,7 +67,7 @@ const wordIndexAtom = atom((get) => {
 
   const bucketIndex = Math.floor(time / timeInterval);
 
-  const searchStartIndex = bucketIndexes[bucketIndex] || 0;
+  const searchStartIndex = bucketIndexes[bucketIndex] - 1 || 0;
   const searchEndIndex = (bucketIndexes[bucketIndex + 1] || words.length) + 1;
 
   const wordIndex = words
@@ -76,7 +76,6 @@ const wordIndexAtom = atom((get) => {
       return word.start <= time && word.end >= time;
     });
   if (wordIndex === -1) {
-    console.log("word not found", time, searchStartIndex, searchEndIndex);
     return -1;
   }
 

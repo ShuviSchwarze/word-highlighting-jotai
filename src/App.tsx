@@ -81,6 +81,7 @@ const wordIndexAtom = atom((get) => {
 
   return wordIndex + searchStartIndex;
 });
+const previousWordIndexAtom = atom(-1);
 
 const Timer = () => {
   const [timestamp, setTimestamp] = useAtom(timestampAtom);
@@ -132,6 +133,11 @@ const flatWordAtomsAtom = atom((get) => {
 
 const highlightWordEffect = atomEffect((get, set) => {
   const wordIndex = get(wordIndexAtom);
+  const previousWordIndex = get(previousWordIndexAtom);
+
+  if (wordIndex === previousWordIndex) {
+    return;
+  }
 
   const flatWordAtoms = get(flatWordAtomsAtom);
 
@@ -143,10 +149,12 @@ const highlightWordEffect = atomEffect((get, set) => {
     ...prev,
     highlight: true,
   }));
-  if (wordIndex === 0) {
+  set(previousWordIndexAtom, wordIndex);
+
+  if (previousWordIndex === -1) {
     return;
   }
-  set(flatWordAtoms[wordIndex - 1], (prev) => ({
+  set(flatWordAtoms[previousWordIndex], (prev) => ({
     ...prev,
     highlight: false,
   }));
